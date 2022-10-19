@@ -13,6 +13,9 @@ class ExpensesApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Definindo as orientações do App
+    // SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
     final ThemeData theme = ThemeData(
       fontFamily: 'OpenSans',
       textTheme: ThemeData.light().textTheme.copyWith(
@@ -48,12 +51,56 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _showChart = false;
+
   final List<Transaction> _transactions = [
     // Transaction(
     //   id: 't0',
     //   title: 'Muita coisa...',
     //   value: 350.60,
-    //   date: DateTime.now().subtract(const Duration(days: 32)),
+    //   date: DateTime.now().subtract(const Duration(days: 3)),
+    // ),
+    // Transaction(
+    //   id: 't1',
+    //   title: 'Muita coisa...',
+    //   value: 350.60,
+    //   date: DateTime.now().subtract(const Duration(days: 3)),
+    // ),
+    // Transaction(
+    //   id: 't2',
+    //   title: 'Muita coisa...',
+    //   value: 350.60,
+    //   date: DateTime.now().subtract(const Duration(days: 3)),
+    // ),
+    // Transaction(
+    //   id: 't3',
+    //   title: 'Muita coisa...',
+    //   value: 350.60,
+    //   date: DateTime.now().subtract(const Duration(days: 3)),
+    // ),
+    // Transaction(
+    //   id: 't4',
+    //   title: 'Muita coisa...',
+    //   value: 350.60,
+    //   date: DateTime.now().subtract(const Duration(days: 3)),
+    // ),
+    // Transaction(
+    //   id: 't5',
+    //   title: 'Muita coisa...',
+    //   value: 350.60,
+    //   date: DateTime.now().subtract(const Duration(days: 3)),
+    // ),
+    // Transaction(
+    //   id: 't6',
+    //   title: 'Muita coisa...',
+    //   value: 350.60,
+    //   date: DateTime.now().subtract(const Duration(days: 3)),
+    // ),
+    // Transaction(
+    //   id: 't7',
+    //   title: 'Muita coisa...',
+    //   value: 350.60,
+    //   date: DateTime.now().subtract(const Duration(days: 3)),
     // ),
   ];
 
@@ -94,26 +141,49 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Despesas Pessoais'),
-        actions: <Widget>[
+    bool isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final appBar = AppBar(
+      title: const Text('Despesas Pessoais'),
+      actions: <Widget>[
+        if (isLandscape)
           IconButton(
-              onPressed: () => _openTransactionFormModal(context),
-              icon: const Icon(Icons.add))
-        ],
-      ),
+              onPressed: () => {setState(() => _showChart = !_showChart)},
+              icon: Icon(_showChart ? Icons.list : Icons.show_chart)),
+        IconButton(
+            onPressed: () => _openTransactionFormModal(context),
+            icon: const Icon(Icons.add)),
+      ],
+    );
+
+    final availableHeight = MediaQuery.of(context).size.height -
+        appBar.preferredSize.height -
+        MediaQuery.of(context).padding.top;
+
+    return Scaffold(
+      appBar: appBar,
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Chart(_recentTransactions),
-              //...
-              TransactionList(_transactions, _removeTransaction),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            if (_showChart || !isLandscape) // funny ;D
+              SizedBox(
+                height: availableHeight * (isLandscape ? 0.75 : 0.3),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Chart(_recentTransactions),
+                ),
+              ),
+            if (!_showChart || !isLandscape)
+              SizedBox(
+                height: availableHeight * (isLandscape ? 1 : 0.7),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8, right: 8),
+                  child: TransactionList(_transactions, _removeTransaction),
+                ),
+              ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
