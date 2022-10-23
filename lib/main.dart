@@ -1,5 +1,8 @@
 import 'dart:math';
+import 'dart:io';
+
 import 'package:expenses_project/components/chart.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'components/transaction_form.dart';
@@ -13,9 +16,6 @@ class ExpensesApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Definindo as orientações do App
-    // SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
     final ThemeData theme = ThemeData(
       fontFamily: 'OpenSans',
       textTheme: ThemeData.light().textTheme.copyWith(
@@ -34,7 +34,6 @@ class ExpensesApp extends StatelessWidget {
             .copyWith(primary: Colors.purple, secondary: Colors.amber[700]),
         appBarTheme: const AppBarTheme(
           titleTextStyle: TextStyle(
-            // fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
@@ -53,56 +52,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool _showChart = false;
 
-  final List<Transaction> _transactions = [
-    // Transaction(
-    //   id: 't0',
-    //   title: 'Muita coisa...',
-    //   value: 350.60,
-    //   date: DateTime.now().subtract(const Duration(days: 3)),
-    // ),
-    // Transaction(
-    //   id: 't1',
-    //   title: 'Muita coisa...',
-    //   value: 350.60,
-    //   date: DateTime.now().subtract(const Duration(days: 3)),
-    // ),
-    // Transaction(
-    //   id: 't2',
-    //   title: 'Muita coisa...',
-    //   value: 350.60,
-    //   date: DateTime.now().subtract(const Duration(days: 3)),
-    // ),
-    // Transaction(
-    //   id: 't3',
-    //   title: 'Muita coisa...',
-    //   value: 350.60,
-    //   date: DateTime.now().subtract(const Duration(days: 3)),
-    // ),
-    // Transaction(
-    //   id: 't4',
-    //   title: 'Muita coisa...',
-    //   value: 350.60,
-    //   date: DateTime.now().subtract(const Duration(days: 3)),
-    // ),
-    // Transaction(
-    //   id: 't5',
-    //   title: 'Muita coisa...',
-    //   value: 350.60,
-    //   date: DateTime.now().subtract(const Duration(days: 3)),
-    // ),
-    // Transaction(
-    //   id: 't6',
-    //   title: 'Muita coisa...',
-    //   value: 350.60,
-    //   date: DateTime.now().subtract(const Duration(days: 3)),
-    // ),
-    // Transaction(
-    //   id: 't7',
-    //   title: 'Muita coisa...',
-    //   value: 350.60,
-    //   date: DateTime.now().subtract(const Duration(days: 3)),
-    // ),
-  ];
+  final List<Transaction> _transactions = [];
 
   List<Transaction> get _recentTransactions {
     return _transactions
@@ -139,31 +89,43 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Widget _getIconButton(IconData icon, void Function() fn) {
+    return Platform.isIOS
+        ? GestureDetector(onTap: fn, child: Icon(icon))
+        : IconButton(icon: Icon(icon), onPressed: fn);
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool isLandscape =
-        MediaQuery.of(context).orientation == Orientation.landscape;
+    final mediaQuery = MediaQuery.of(context);
+    bool isLandscape = mediaQuery.orientation == Orientation.landscape;
+
+    final actions = <Widget>[
+      if (isLandscape)
+        _getIconButton(_showChart ? Icons.list : Icons.show_chart,
+            () => {setState(() => _showChart = !_showChart)}),
+      _getIconButton(
+        Platform.isIOS ? CupertinoIcons.add : Icons.add,
+        () => _openTransactionFormModal(context),
+      ),
+    ];
 
     final appBar = AppBar(
       title: const Text('Despesas Pessoais'),
-      actions: <Widget>[
-        if (isLandscape)
-          IconButton(
-              onPressed: () => {setState(() => _showChart = !_showChart)},
-              icon: Icon(_showChart ? Icons.list : Icons.show_chart)),
-        IconButton(
-            onPressed: () => _openTransactionFormModal(context),
-            icon: const Icon(Icons.add)),
-      ],
+      actions: actions,
     );
 
-    final availableHeight = MediaQuery.of(context).size.height -
-        appBar.preferredSize.height -
-        MediaQuery.of(context).padding.top;
+    final appBarIOS = CupertinoNavigationBar(
+      middle: const Text('Despesas Pessoais'),
+      trailing: Row(mainAxisSize: MainAxisSize.min, children: actions),
+    );
 
-    return Scaffold(
-      appBar: appBar,
-      body: SingleChildScrollView(
+    final availableHeight = mediaQuery.size.height -
+        appBar.preferredSize.height -
+        mediaQuery.padding.top;
+
+    final bodyPage = SafeArea(
+      child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -186,11 +148,22 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openTransactionFormModal(context),
-        child: const Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            navigationBar: appBarIOS,
+            child: bodyPage,
+          )
+        : Scaffold(
+            appBar: appBar,
+            body: bodyPage,
+            floatingActionButton: FloatingActionButton(
+              onPressed: () => _openTransactionFormModal(context),
+              child: const Icon(Icons.add),
+            ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+          );
   }
 }
