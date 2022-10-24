@@ -1,5 +1,5 @@
+import 'package:expenses_project/components/transaction_item.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/transaction.dart';
 
 class TransactionList extends StatelessWidget {
@@ -36,42 +36,11 @@ class TransactionList extends StatelessWidget {
             itemCount: transactions.length,
             itemBuilder: (ctx, index) {
               final tr = transactions[index];
-              return Card(
-                elevation: 5,
-                margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: FittedBox(
-                        child: Text(
-                          'R\$${tr.value.toStringAsFixed(2)}',
-                        ),
-                      ),
-                    ),
-                  ),
-                  title: Text(
-                    tr.title,
-                    style: Theme.of(context).textTheme.headline6,
-                  ),
-                  subtitle: Text(
-                    DateFormat('dd MMM y').format(tr.date),
-                  ),
-                  trailing: mediaQuery.size.width > 400
-                      ? TextButton.icon(
-                          onPressed: () => onRemove(tr.id),
-                          icon: const Icon(Icons.delete),
-                          label: const Text('Excluir'),
-                        )
-                      : IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () => onRemove(tr.id),
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                ),
-              );
+              return TransactionItem(
+                  key: GlobalObjectKey(tr), // chaveando globalmente
+                  tr: tr,
+                  mediaQuery: mediaQuery,
+                  onRemove: onRemove);
             },
           );
   }

@@ -8,16 +8,42 @@ import 'package:flutter/material.dart';
 class TransactionForm extends StatefulWidget {
   final void Function(String title, double value, DateTime date) onSubmit;
 
-  const TransactionForm(this.onSubmit, {super.key});
+  TransactionForm(this.onSubmit, {super.key}) {
+    // print('constructor => TransactionForm');
+  }
 
   @override
-  State<TransactionForm> createState() => _TransactionFormState();
+  State<TransactionForm> createState() {
+    // print('createState => TransactionForm');
+    return _TransactionFormState();
+  }
 }
 
 class _TransactionFormState extends State<TransactionForm> {
   final _titleController = TextEditingController();
   final _valueController = TextEditingController();
   DateTime? _selectedDate;
+
+  @override
+  void initState() {
+    // criar estado
+    super.initState();
+    // print('initState => _TransactionFormState');
+  }
+
+  @override
+  didUpdateWidget(TransactionForm oldWidget) {
+    // quando o widget atualiza
+    super.didUpdateWidget(oldWidget);
+    // print('didUpdateWidget => _TransactionFormState');
+  }
+
+  @override
+  void dispose() {
+    // desconstruir
+    super.dispose();
+    // print('dispose => _TransactionFormState');
+  }
 
   _submitForm() {
     final title = _titleController.text;
@@ -41,6 +67,8 @@ class _TransactionFormState extends State<TransactionForm> {
 
   @override
   Widget build(BuildContext context) {
+    // print('build => _TransactionFormState');
+
     final mediaQuery = MediaQuery.of(context);
     return SingleChildScrollView(
       child: Card(
